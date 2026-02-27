@@ -6,147 +6,605 @@
 <title>LifeDesk Dashboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-body {
-    background-color: #f5f7fa;
-} 
-.card {
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-.priority-low { background-color: #e9ecef; }
-.priority-medium { background-color: #cfe2ff; }
-.priority-high { background-color: #ffe5b4; }
-.priority-critical { background-color: #f8d7da; }
+  body { background-color: #f5f7fa; }
+
+  /* Greeting bar */
+  .greeting-bar {
+    background: #1e293b;
+    color: #fff;
+    padding: 10px 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .greeting-bar .welcome {
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .greeting-bar .welcome .emoji { font-size: 18px; }
+  .greeting-bar .welcome .name  { color: #93c5fd; }
+  .greeting-bar .datetime {
+    font-size: 13px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .greeting-bar .datetime .time {
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: monospace;
+  }
+
+  .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+  /* Priority row colours */
+  .priority-low      { background-color: #e9ecef; }
+  .priority-medium   { background-color: #cfe2ff; }
+  .priority-high     { background-color: #ffe5b4; }
+  .priority-critical { background-color: #f8d7da; }
+
+  /* Filter tabs */
+  .filter-tabs {
+    background: #fff;
+    border-bottom: 2px solid #e9ecef;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .filter-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 12px 16px;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .filter-tabs .nav-link:hover  { color: #212529; }
+  .filter-tabs .nav-link.active { color: #0d6efd; border-bottom-color: #0d6efd; }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot-all      { background:#212529; }
+  .dot-low      { background:#198754; }
+  .dot-medium   { background:#0d6efd; }
+  .dot-high     { background:#fd7e14; }
+  .dot-critical { background:#dc3545; }
+  .dot-inprog   { background:#6f42c1; }
+
+  /* Priority & status pill badges */
+  .badge-low      { background:#d1e7dd; color:#0f5132; }
+  .badge-medium   { background:#cfe2ff; color:#084298; }
+  .badge-high     { background:#ffe5b4; color:#7a4f01; }
+  .badge-critical { background:#f8d7da; color:#842029; }
+  .badge-open     { background:#cff4fc; color:#055160; }
+  .badge-inprog   { background:#e8d5ff; color:#4a0e8f; }
+  .badge-done     { background:#d1e7dd; color:#0f5132; }
+
+  .priority-badge, .status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+
+  /* Stat card colour accents */
+  .stat-open  .big-num  { color: #0d6efd; }
+  .stat-inprog .big-num { color: #6f42c1; }
+  .stat-high  .big-num  { color: #dc3545; }
+  .stat-done  .big-num  { color: #198754; }
+  .big-num { font-size: 2rem; font-weight: 700; }
+
+  /* Description preview under title in table */
+  .desc-preview {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+  }
 </style>
 </head>
 <body>
 
-<div class="container py-4">
-    <h2 class="mb-4">LifeDesk IT Dashboard</h2>
-
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card p-3 text-center">
-                <h6>Open Tickets</h6>
-                <h3 id="openCount">0</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card p-3 text-center">
-                <h6>High Priority</h6>
-                <h3 id="highCount">0</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card p-3 text-center">
-                <h6>Completed</h6>
-                <h3 id="completedCount">0</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="card p-4 mb-4">
-        <h5>Add New Ticket</h5>
-        <input type="text" id="title" class="form-control mb-2" placeholder="Task title">
-        <select id="priority" class="form-control mb-2">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
-        </select>
-        <input type="date" id="dueDate" class="form-control mb-2">
-        <button onclick="addTicket()" class="btn btn-primary w-100">Create Ticket</button>
-    </div>
-
-    <div class="card p-4">
-        <h5>All Tickets</h5>
-        <table class="table mt-3">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Priority</th>
-                    <th>Due</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="ticketTable"></tbody>
-        </table>
-    </div>
+<!-- ── GREETING BAR ───────────────────────────────────────── -->
+<div class="greeting-bar">
+  <div class="welcome">
+    <span class="emoji" id="greetEmoji">👋</span>
+    <span id="greetText">Good morning,</span>&nbsp;<span class="name">Welcome Back, MR RSV</span>
+  </div>
+  <div class="datetime">
+    <span id="greetDate"></span>
+    <span class="time" id="greetTime"></span>
+  </div>
 </div>
 
+<!-- ── FILTER TABS ─────────────────────────────────────────── -->
+<div class="filter-tabs">
+  <a class="nav-link active" href="#" onclick="setFilter('all',this);return false;">
+    <span class="dot dot-all"></span>All
+  </a>
+  <a class="nav-link" href="#" onclick="setFilter('low',this);return false;">
+    <span class="dot dot-low"></span>Low
+  </a>
+  <a class="nav-link" href="#" onclick="setFilter('medium',this);return false;">
+    <span class="dot dot-medium"></span>Medium
+  </a>
+  <a class="nav-link" href="#" onclick="setFilter('high',this);return false;">
+    <span class="dot dot-high"></span>High
+  </a>
+  <a class="nav-link" href="#" onclick="setFilter('critical',this);return false;">
+    <span class="dot dot-critical"></span>Critical
+  </a>
+  <a class="nav-link" href="#" onclick="setFilter('inprogress',this);return false;">
+    <span class="dot dot-inprog"></span>In Progress
+  </a>
+
+  <!-- Quick In-Progress toggle button -->
+  <button id="inProgressBtn"
+          class="btn btn-sm ms-auto my-2"
+          style="background:#e8d5ff;color:#4a0e8f;border:1px solid #c4b5fd;font-weight:600;"
+          onclick="toggleInProgress()">
+    ⚡ Show In Progress
+  </button>
+</div>
+
+<!-- ── MAIN ───────────────────────────────────────────────── -->
+<div class="container py-4">
+  <h2 class="mb-4">LifeDesk IT Dashboard</h2>
+
+  <!-- Stat cards -->
+  <div class="row mb-4 g-3">
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center stat-open">
+        <h6 class="text-muted mb-1" style="font-size:13px;">Open Tickets</h6>
+        <div class="big-num" id="openCount">0</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center stat-inprog">
+        <h6 class="text-muted mb-1" style="font-size:13px;">In Progress</h6>
+        <div class="big-num" id="inProgressCount">0</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center stat-high">
+        <h6 class="text-muted mb-1" style="font-size:13px;">High Priority</h6>
+        <div class="big-num" id="highCount">0</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center stat-done">
+        <h6 class="text-muted mb-1" style="font-size:13px;">Completed</h6>
+        <div class="big-num" id="completedCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Ticket form -->
+  <div class="card p-4 mb-4">
+    <h5 class="mb-3">Add New Ticket</h5>
+    <input type="text" id="title" class="form-control mb-2" placeholder="Task title">
+    <textarea id="description" class="form-control mb-2" rows="2"
+              placeholder="Description (optional)"></textarea>
+    <div class="row g-2 mb-2">
+      <div class="col-md-6">
+        <select id="priority" class="form-select">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical" selected>Critical</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <input type="date" id="dueDate" class="form-control">
+      </div>
+    </div>
+    <button onclick="addTicket()" class="btn btn-primary w-100">Create Ticket</button>
+  </div>
+
+  <!-- Ticket table -->
+  <div class="card p-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h5 class="mb-0">All Tickets</h5>
+      <span id="ticketCountBadge"
+            class="badge rounded-pill"
+            style="background:#e9ecef;color:#495057;font-size:12px;">0 tickets</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Due</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ticketTable"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="text-center text-muted py-4" style="display:none;">
+      No tickets found for this filter.
+    </div>
+  </div>
+</div>
+
+<!-- ── EDIT MODAL ──────────────────────────────────────────── -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Ticket</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="editTitle" class="form-control mb-2" placeholder="Task title">
+        <textarea id="editDescription" class="form-control mb-2" rows="2"
+                  placeholder="Description (optional)"></textarea>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <select id="editPriority" class="form-select">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <input type="date" id="editDueDate" class="form-control">
+          </div>
+        </div>
+        <select id="editStatus" class="form-select">
+          <option value="open">Open</option>
+          <option value="inprogress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+  // ── State ─────────────────────────────────────────────────────
+  let tickets   = JSON.parse(localStorage.getItem("tickets") || "[]");
+  let nextId    = tickets.length ? Math.max(...tickets.map(t => t.id ?? 0)) + 1 : 1;
+  let filter    = "all";
+  let editingId = null;
+  let editModalInstance;
 
-function saveTickets() {
+  // Wait for Bootstrap JS to be ready before creating modal instance
+  document.addEventListener("DOMContentLoaded", () => {
+    editModalInstance = new bootstrap.Modal(document.getElementById("editModal"));
+  });
+
+  // Migrate old tickets that lack id / description / status fields
+  tickets.forEach((t, i) => {
+    if (t.id === undefined || t.id === null) t.id = i + 1;
+    if (!t.description) t.description = "";
+    if (!t.status)      t.status      = t.completed ? "completed" : "open";
+  });
+  saveTickets();
+
+  // ── Persistence ───────────────────────────────────────────────
+  function saveTickets() {
     localStorage.setItem("tickets", JSON.stringify(tickets));
-}
+  }
 
-function updateDashboard() {
-    document.getElementById("openCount").innerText = tickets.filter(t => !t.completed).length;
-    document.getElementById("highCount").innerText = tickets.filter(t => t.priority === "high" || t.priority === "critical").length;
-    document.getElementById("completedCount").innerText = tickets.filter(t => t.completed).length;
-}
-
-function renderTickets() {
-    const table = document.getElementById("ticketTable");
-    table.innerHTML = "";
-
-    tickets.forEach((ticket, index) => {
-        table.innerHTML += `
-            <tr class="priority-${ticket.priority}">
-                <td>${index + 1}</td>
-                <td>${ticket.title}</td>
-                <td>${ticket.priority}</td>
-                <td>${ticket.dueDate || "-"}</td>
-                <td>${ticket.completed ? "Completed" : "Open"}</td>
-                <td>
-                    <button class="btn btn-sm btn-success" onclick="completeTicket(${index})">✓</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteTicket(${index})">✕</button>
-                </td>
-            </tr>
-        `;
-    });
-
-    updateDashboard();
-}
-
-function addTicket() {
-    const title = document.getElementById("title").value;
-    const priority = document.getElementById("priority").value;
-    const dueDate = document.getElementById("dueDate").value;
-
-    if (!title) return alert("Please enter a task title");
+  // ── Add ticket ────────────────────────────────────────────────
+  function addTicket() {
+    const title = document.getElementById("title").value.trim();
+    if (!title) { alert("Please enter a task title."); return; }
 
     tickets.push({
-        title,
-        priority,
-        dueDate,
-        completed: false
+      id:          nextId++,
+      title,
+      description: document.getElementById("description").value.trim(),
+      priority:    document.getElementById("priority").value,
+      dueDate:     document.getElementById("dueDate").value,
+      status:      "open",
+      completed:   false
     });
 
     saveTickets();
-    renderTickets();
+    document.getElementById("title").value       = "";
+    document.getElementById("description").value = "";
+    document.getElementById("dueDate").value      = "";
+    render();
+  }
 
-    document.getElementById("title").value = "";
-    document.getElementById("dueDate").value = "";
-}
-
-function completeTicket(index) {
-    tickets[index].completed = true;
+  // ── Delete ticket ─────────────────────────────────────────────
+  function deleteTicket(id) {
+    if (!confirm("Are you sure you want to delete this ticket?")) return;
+    tickets = tickets.filter(t => t.id !== id);
     saveTickets();
-    renderTickets();
-}
+    render();
+  }
 
-function deleteTicket(index) {
-    tickets.splice(index, 1);
+  // ── Toggle complete ───────────────────────────────────────────
+  function completeTicket(id) {
+    const t = tickets.find(t => t.id === id);
+    if (!t) return;
+    t.status    = t.status === "completed" ? "open" : "completed";
+    t.completed = t.status === "completed";
     saveTickets();
-    renderTickets();
-}
+    render();
+  }
 
-renderTickets();
+  // ── Mark In Progress ──────────────────────────────────────────
+  function markInProgress(id) {
+    const t = tickets.find(t => t.id === id);
+    if (!t) return;
+    t.status    = t.status === "inprogress" ? "open" : "inprogress";
+    t.completed = false;
+    saveTickets();
+    render();
+  }
+
+  // ── Open edit modal ───────────────────────────────────────────
+  function openEdit(id) {
+    editingId = id;
+    const t   = tickets.find(t => t.id === id);
+    document.getElementById("editTitle").value       = t.title;
+    document.getElementById("editDescription").value = t.description || "";
+    document.getElementById("editPriority").value    = t.priority;
+    document.getElementById("editDueDate").value     = t.dueDate || "";
+    document.getElementById("editStatus").value      = t.status;
+    editModalInstance.show();
+  }
+
+  function saveEdit() {
+    const title = document.getElementById("editTitle").value.trim();
+    if (!title) { alert("Please enter a title."); return; }
+    const t       = tickets.find(t => t.id === editingId);
+    t.title       = title;
+    t.description = document.getElementById("editDescription").value.trim();
+    t.priority    = document.getElementById("editPriority").value;
+    t.dueDate     = document.getElementById("editDueDate").value;
+    t.status      = document.getElementById("editStatus").value;
+    t.completed   = t.status === "completed";
+    saveTickets();
+    editModalInstance.hide();
+    render();
+  }
+
+  // ── Tab filter ────────────────────────────────────────────────
+  function setFilter(f, el) {
+    filter = f;
+    // Reset In Progress quick-button
+    const btn = document.getElementById("inProgressBtn");
+    btn.style.background = "#e8d5ff";
+    btn.style.color      = "#4a0e8f";
+    btn.textContent      = "⚡ Show In Progress";
+    // Update active tab
+    document.querySelectorAll(".filter-tabs .nav-link").forEach(a => a.classList.remove("active"));
+    if (el) el.classList.add("active");
+    render();
+  }
+
+  // ── In-progress quick-button ──────────────────────────────────
+  function toggleInProgress() {
+    const btn = document.getElementById("inProgressBtn");
+    if (filter === "_inprog_quick") {
+      // Turn off — go back to All
+      setFilter("all", document.querySelector(".filter-tabs .nav-link"));
+    } else {
+      filter = "_inprog_quick";
+      document.querySelectorAll(".filter-tabs .nav-link").forEach(a => a.classList.remove("active"));
+      btn.style.background = "#6f42c1";
+      btn.style.color      = "#fff";
+      btn.textContent      = "✕ Hide In Progress";
+      render();
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────────────
+  function render() {
+    let list = tickets.slice();
+
+    if (["low","medium","high","critical"].includes(filter)) {
+      list = list.filter(t => t.priority === filter);
+    } else if (filter === "inprogress" || filter === "_inprog_quick") {
+      list = list.filter(t => t.status === "inprogress");
+    }
+
+    // Stats always reflect full ticket list
+    document.getElementById("openCount").textContent       = tickets.filter(t => t.status === "open").length;
+    document.getElementById("inProgressCount").textContent = tickets.filter(t => t.status === "inprogress").length;
+    document.getElementById("highCount").textContent       = tickets.filter(t => t.priority === "high" || t.priority === "critical").length;
+    document.getElementById("completedCount").textContent  = tickets.filter(t => t.status === "completed").length;
+
+    document.getElementById("ticketCountBadge").textContent =
+      list.length + " ticket" + (list.length !== 1 ? "s" : "");
+
+    const tbody      = document.getElementById("ticketTable");
+    const emptyState = document.getElementById("emptyState");
+
+    if (list.length === 0) {
+      tbody.innerHTML          = "";
+      emptyState.style.display = "block";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    tbody.innerHTML = list.map(t => {
+      const pMap   = { low:"badge-low", medium:"badge-medium", high:"badge-high", critical:"badge-critical" };
+      const pLabel = t.priority.charAt(0).toUpperCase() + t.priority.slice(1);
+
+      let sClass, sLabel;
+      if      (t.status === "completed")  { sClass = "badge-done";  sLabel = "Completed";  }
+      else if (t.status === "inprogress") { sClass = "badge-inprog"; sLabel = "In Progress"; }
+      else                                { sClass = "badge-open";   sLabel = "Open";       }
+
+      const completeBtnCls   = t.status === "completed" ? "btn-warning"  : "btn-success";
+      const completeBtnLabel = t.status === "completed" ? "↩ Reopen"     : "✓";
+      const inProgBtnLabel   = t.status === "inprogress" ? "↩"           : "⚡";
+      const inProgBtnTitle   = t.status === "inprogress" ? "Remove In Progress" : "Mark In Progress";
+
+      const descHtml = t.description
+        ? `<div class="desc-preview">${esc(t.description)}</div>` : "";
+
+      return `
+        <tr class="priority-${t.priority}">
+          <td style="font-family:monospace;font-size:13px;color:#6c757d;">${t.id}</td>
+          <td>
+            <div>${esc(t.title)}</div>
+            ${descHtml}
+          </td>
+          <td><span class="priority-badge ${pMap[t.priority]}">${pLabel}</span></td>
+          <td style="font-size:13px;">${t.dueDate || "—"}</td>
+          <td><span class="status-badge ${sClass}">${sLabel}</span></td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              <button class="btn btn-sm ${completeBtnCls}"
+                      onclick="completeTicket(${t.id})"
+                      title="${t.status === 'completed' ? 'Reopen' : 'Mark Complete'}">
+                ${completeBtnLabel}
+              </button>
+              <button class="btn btn-sm"
+                      style="background:#e8d5ff;color:#4a0e8f;"
+                      onclick="markInProgress(${t.id})"
+                      title="${inProgBtnTitle}">
+                ${inProgBtnLabel}
+              </button>
+              <button class="btn btn-sm btn-outline-primary"
+                      onclick="openEdit(${t.id})"
+                      title="Edit ticket">✏️</button>
+              <button class="btn btn-sm btn-danger"
+                      onclick="deleteTicket(${t.id})"
+                      title="Delete ticket">✕</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+
+  // Initial render (after DOM ready)
+  document.addEventListener("DOMContentLoaded", render);
+
+  // ── Bulletproof UK clock (handles GMT/BST automatically) ──────
+  //
+  // Strategy: derive the exact local time in Europe/London by comparing
+  // what Intl formats as "numeric" year/month/day/hour/minute/second
+  // (all separate, all numeric — no locale string parsing, no AM/PM
+  // ambiguity, no dayPeriod weirdness). Then we do our own 12-hour
+  // conversion in plain arithmetic so nothing can go wrong.
+
+  function getUKDateParts(now) {
+    // Request each field individually as a number so formatToParts
+    // always returns type:"year", type:"month" etc. with plain digits.
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      timeZone : "Europe/London",
+      year     : "numeric",
+      month    : "2-digit",
+      day      : "2-digit",
+      hour     : "2-digit",
+      minute   : "2-digit",
+      second   : "2-digit",
+      hour12   : false          // always 0-23, no AM/PM, no "24" edge case
+    });
+
+    const parts = {};
+    fmt.formatToParts(now).forEach(function(p) {
+      if (p.type !== "literal") parts[p.type] = parseInt(p.value, 10);
+    });
+
+    // Intl hour12:false can return 24 for midnight on some engines — clamp it
+    if (parts.hour === 24) parts.hour = 0;
+
+    return parts;   // { year, month, day, hour, minute, second }
+  }
+
+  // Day / month name tables — no locale dependence at all
+  var DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var MONTHS = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+
+  // Given a UTC Date, return the day-of-week for Europe/London
+  function getUKWeekday(now) {
+    // Build a fake UTC date that represents London wall-clock time,
+    // then call getUTCDay() which is always correct regardless of the
+    // machine's local timezone.
+    var p   = getUKDateParts(now);
+    var fake = new Date(Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second));
+    return fake.getUTCDay();   // 0=Sun … 6=Sat
+  }
+
+  function pad2(n) { return n < 10 ? "0" + n : String(n); }
+
+  function updateClock() {
+    var now  = new Date();
+    var p    = getUKDateParts(now);   // all integers, hour is 0-23
+
+    // ── 12-hour conversion ──────────────────────────────────────
+    var h12  = p.hour % 12;
+    if (h12 === 0) h12 = 12;          // 0 → 12, 12 → 12
+    var ampm = p.hour < 12 ? "AM" : "PM";
+
+    // ── Greeting ────────────────────────────────────────────────
+    var greeting, emoji;
+    if      (p.hour >= 5  && p.hour < 12) { greeting = "Good morning,";   emoji = "🌤️"; }
+    else if (p.hour >= 12 && p.hour < 17) { greeting = "Good afternoon,"; emoji = "☀️"; }
+    else if (p.hour >= 17 && p.hour < 21) { greeting = "Good evening,";   emoji = "🌇"; }
+    else                                   { greeting = "Good night,";     emoji = "🌙"; }
+
+    // ── Date string ─────────────────────────────────────────────
+    var weekday   = DAYS[getUKWeekday(now)];
+    var monthName = MONTHS[p.month - 1];
+    var dateStr   = weekday + ", " + p.day + " " + monthName + " " + p.year;
+
+    // ── Time string  e.g. "09:45:32 PM" ────────────────────────
+    var timeStr = pad2(h12) + ":" + pad2(p.minute) + ":" + pad2(p.second) + " " + ampm;
+
+    // ── Write to DOM ────────────────────────────────────────────
+    document.getElementById("greetEmoji").textContent = emoji;
+    document.getElementById("greetText").textContent  = greeting;
+    document.getElementById("greetDate").textContent  = dateStr;
+    document.getElementById("greetTime").textContent  = timeStr;
+  }
+
+  // Run immediately then every second
+  updateClock();
+  setInterval(updateClock, 1000);
 </script>
-
 </body>
 </html>
